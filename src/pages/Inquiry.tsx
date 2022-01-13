@@ -1,6 +1,6 @@
 import React from "react";
 
-const Inquiry = () => {
+const Inquiry:React.FC = () => {
   return <div>Inquiry</div>;
 };
 
