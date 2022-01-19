@@ -104,7 +104,7 @@ const Home: React.FC = (props) => {
       }
     });
   }, []);
-
+  //shuchu
   return (
     <>
       {(list || []).map((i) => {
