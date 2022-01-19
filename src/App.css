@@ -12,13 +12,22 @@
 }
 
 .trigger:hover {
-  color: #1890ff;
+  color: #cbd1d6;
+}
+.trigger {
+  position: absolute;
+  bottom: 12px;
+  left: 7px;
 }
 
 .logo {
   height: 32px;
   margin: 16px;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgb(255, 255, 255);
+}
+.js-logo svg {
+  height: 36px;
+  width: 28px;
 }
 
 .site-layout-background {
