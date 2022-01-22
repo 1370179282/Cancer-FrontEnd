@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Layout, Menu, Button, Space, Image } from "antd";
+import React, { LegacyRef, useEffect, useRef, useState } from "react";
+import { Layout, Menu, Button, Space, Image, message } from "antd";
 import * as tf from "@tensorflow/tfjs";
 import { MenuUnfoldOutlined } from "@ant-design/icons";
 import { MnistData } from "./data";
@@ -11,16 +11,13 @@ const convertCanvasToImage = (canvas) => {
 };
 
 const Home: React.FC = (props) => {
+  const ref = useRef<any>();
   const [list, setlist] = useState<any[]>();
+  const [modelPro, setmodel] = useState<any>();
   const imagelist: any[] = [];
   const data = new MnistData();
   const bath_size = 20;
-  const tensor = tf.tensor2d([
-    [1, 2],
-    [3, 4],
-  ]);
-  console.log(tensor.arraySync(), "ssss");
-
+  const model = tf.sequential();
   useEffect(() => {
     //加载图片
     data.load().then(async () => {
@@ -40,7 +37,6 @@ const Home: React.FC = (props) => {
           }
         });
       }
-      const model = tf.sequential();
       model.add(
         tf.layers.conv2d({
           inputShape: [28, 28, 1],
@@ -93,27 +89,68 @@ const Home: React.FC = (props) => {
         const d = data.nextTestBatch(200);
         return [d.xs.reshape([200, 28, 28, 1]), d.labels];
       });
-      for (let i = 0; i < 20; i++) {
-        const h = await model.fit(trainXs, trainYs, {
-          validationData: [testXs, testYs],
-          batchSize: 500,
-          epochs: 4,
-        });
-        console.log("Loss after Epoch " + i + " : " + h.history.loss[0]);
-        console.log("acc after Epoch " + i + " : " + h.history.acc[0]);
-      }
+
+      const h = await model.fit(trainXs, trainYs, {
+        validationData: [testXs, testYs],
+        batchSize: 500,
+        epochs: 40,
+      });
+      setmodel(model);
+      console.log(h, "modelhiseory");
     });
   }, []);
-  //shuchu
   return (
     <>
-      {(list || []).map((i) => {
-        return (
-          <a style={{ marginLeft: 10 }} key={i}>
-            <Image src={i} width={100} height={100} style={{}}></Image>
-          </a>
-        );
-      })}
+      <div>
+        <canvas
+          ref={(api) => (ref.current = api)}
+          width={300}
+          height={300}
+          onMouseMove={(e) => {
+            if (e.buttons === 1) {
+              const ctx = e.currentTarget.getContext("2d");
+              ctx!.fillStyle = "rgb(255,255,255)";
+              ctx!.fillRect(
+                e.nativeEvent.offsetX,
+                e.nativeEvent.offsetY,
+                10,
+                10
+              );
+            }
+          }}
+          style={{ backgroundColor: "gray" }}
+        ></canvas>
+        <Button
+          onClick={() => {
+            const input = tf.tidy(() => {
+              return tf.image
+                .resizeBilinear(
+                  tf.browser.fromPixels(ref.current),
+                  [28, 28],
+                  true
+                )
+                .slice([0, 0, 0], [28, 28, 1])
+                .toFloat()
+                .div(255)
+                .reshape([1, 28, 28, 1]);
+            });
+            const pred = modelPro.predict(input).argMax(1);
+            message.info(`预测结果为 ${pred.dataSync()[0]}`);
+          }}
+        >
+          开始检测
+        </Button>
+        <Button
+          type="primary"
+          onClick={() => {
+            const ctx = ref.current.getContext("2d");
+            ctx.fillStyle = "rgb(0,0,0)";
+            ctx.fillRect(0, 0, 300, 300);
+          }}
+        >
+          清除画布
+        </Button>
+      </div>
     </>
   );
 };
