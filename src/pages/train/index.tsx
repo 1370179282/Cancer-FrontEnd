@@ -1,9 +1,9 @@
 import React, { LegacyRef, useEffect, useRef, useState } from "react";
 import { Layout, Menu, Button, Space, Image, message } from "antd";
 import * as tf from "@tensorflow/tfjs";
-import { MenuUnfoldOutlined } from "@ant-design/icons";
+
 import { MnistData } from "./data";
-import csv from "csv-parser";
+
 // import * as tfvis from "@tensorflow/tfjs-vis";
 
 const convertCanvasToImage = (canvas) => {
