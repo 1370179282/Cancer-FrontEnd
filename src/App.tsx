@@ -4,21 +4,35 @@ import React, { Fragment } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import "./App.css";
 import { useState } from "react";
-import { Layout, Menu } from "antd";
+import {
+  Avatar,
+  Dropdown,
+  Layout,
+  Menu,
+  message,
+  Modal,
+  Typography,
+} from "antd";
 import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
   ApartmentOutlined,
   FolderOpenOutlined,
   ExperimentOutlined,
+  UnorderedListOutlined,
+  LogoutOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
-import Home from "./pages/train";
-import Inquiry from "./pages/hittool";
-import Offer from "./pages/list";
+import Train from "./pages/train";
+import Hittool from "./pages/hittool";
+import List from "./pages/list";
 import scnuLogo from "./picture/141541642254884_.pic_hd.jpg";
 import { createFromIconfontCN } from "@ant-design/icons";
 import { observer } from "mobx-react";
-import { Login } from "./compoment/login";
+import Login from "./compoment/login";
+import userStore from "./store/userstore";
+
+const { Text } = Typography;
 
 const IconFont = createFromIconfontCN({
   scriptUrl: [
@@ -30,14 +44,40 @@ const { Header, Sider, Content, Footer } = Layout;
 
 const App: React.FC = (props) => {
   const [collapsed, setCollapsed] = useState<boolean>(false);
+  const [isLogined, setLogined] = useState<boolean>(false);
+  const [userData, setData] = useState<Record<string, string>>();
+
+  //const username = storage.getItem("username");
+  React.useEffect(() => {
+    const token = window.localStorage.getItem("token");
+    fetch("http://127.0.0.1:3007/my/userinfo", {
+      method: "GET",
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((r) => r.json())
+      .then((r) => {
+        console.log(r, "r");
+        if (r.status === 0) {
+          if (!isLogined) message.success("自动登录成功");
+
+          setLogined(true);
+          setData(r.data);
+        } else {
+          message.error("身份认证失败/过期，请重新登陆");
+          setLogined(false);
+        }
+      });
+  }, [isLogined]);
   return (
     <>
-      {!!1 && (
+      {!isLogined && (
         <>
-          <Login isLogin={true} />
+          <Login setLogined={setLogined} />
         </>
       )}
-      {!!0 && (
+      {isLogined && (
         <>
           <Layout style={{ height: "100%" }}>
             <Sider
@@ -93,23 +133,84 @@ const App: React.FC = (props) => {
                     src={scnuLogo}
                     height={45}
                     width={168}
-                    style={{ right: 12, position: "absolute", top: 12 }}
+                    style={{ left: 12, position: "absolute", top: 12 }}
                   />
                 </a>
+                <Dropdown
+                  arrow
+                  overlay={
+                    <Menu>
+                      <Menu.Item key="0">
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          href="https://www.antgroup.com"
+                        >
+                          个人中心
+                        </a>{" "}
+                        <UserOutlined />
+                      </Menu.Item>
+                      <Menu.Item key="1">
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          href="https://www.aliyun.com"
+                        >
+                          还没写呢
+                        </a>{" "}
+                        <UnorderedListOutlined />
+                      </Menu.Item>
+                      <Menu.Divider />
+                      <Menu.Item key="3">
+                        <Text
+                          type="danger"
+                          onClick={() => {
+                            Modal.error({
+                              title: "确认退出？",
+                              okText: "退出",
+                              closable: true,
+                              maskClosable: true,
+                              okType: "danger",
+                              onOk: () => {
+                                window.localStorage.setItem("token", "");
+                                setLogined(false);
+                              },
+                            });
+                          }}
+                        >
+                          退出登陆
+                        </Text>{" "}
+                        <LogoutOutlined style={{ color: "red" }} />
+                      </Menu.Item>
+                    </Menu>
+                  }
+                >
+                  <Avatar
+                    style={{
+                      backgroundColor: "rgba(25,121,254)",
+                      position: "absolute",
+                      top: 16,
+                      right: 20,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {userData?.username[0]}
+                  </Avatar>
+                </Dropdown>
               </Header>
               <Content
                 className="site-layout-background"
                 style={{
-                  margin: "24px 24px 0px 24px",
+                  margin: "12px 12px 0px 12px",
                   marginBottom: "0px",
                   padding: 16,
                   minHeight: 280,
                 }}
               >
                 <Routes>
-                  <Route path="/hittool" element={<Inquiry />} />
-                  <Route path="/train" element={<Home />} />
-                  <Route path="/list" element={<Offer />} />
+                  <Route path="/hittool" element={<Hittool />} />
+                  <Route path="/train" element={<Train />} />
+                  <Route path="/list" element={<List />} />
                 </Routes>
               </Content>
               <Footer style={{ textAlign: "center", padding: "0px 50px" }}>

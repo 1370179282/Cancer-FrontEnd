@@ -1,7 +1,7 @@
 import React from "react";
 
-const Inquiry:React.FC = () => {
+const Hittool: React.FC = () => {
   return <div>Inquiry</div>;
 };
 
-export default Inquiry;
+export default Hittool;

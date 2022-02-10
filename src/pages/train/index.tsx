@@ -10,7 +10,7 @@ const convertCanvasToImage = (canvas) => {
   return canvas.toDataURL("image/png");
 };
 
-const Home: React.FC = (props) => {
+const Train: React.FC = (props) => {
   const ref = useRef<any>();
   const [list, setlist] = useState<any[]>();
   const [modelPro, setmodel] = useState<any>();
@@ -155,4 +155,4 @@ const Home: React.FC = (props) => {
   );
 };
 
-export default Home;
+export default Train;
