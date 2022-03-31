@@ -1,8 +1,10 @@
 import * as React from "react";
-//import userStore from "../store/userstore/index";
+
 import { Form, Input, Button, Checkbox, message } from "antd";
 import userStore from "../store/userstore";
 import { observer } from "mobx-react";
+
+
 
 const Login: React.FC<{
   setLogined: React.Dispatch<React.SetStateAction<boolean>>;
@@ -83,7 +85,7 @@ const Login: React.FC<{
             name="username"
             rules={[{ required: true, message: "请输入用户名！" }]}
           >
-            <Input />
+            <Input style={{ display: "flex" }} />
           </Form.Item>
 
           <Form.Item

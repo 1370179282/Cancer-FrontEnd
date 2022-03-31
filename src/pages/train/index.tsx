@@ -154,5 +154,3 @@ const Train: React.FC = (props) => {
     </>
   );
 };
-
-export default Train;
