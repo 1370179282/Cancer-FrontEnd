@@ -11,7 +11,7 @@ import {
   reguserResponse,
   userInfoResponse,
   userInfoResquestPara,
-} from "../types/type";
+} from "../../types/type";
 
 export const goLogin = (l: loginRequestPara): Promise<loginResponse> => {
   const { username, password } = l;
@@ -36,7 +36,7 @@ export const goReguser = (r: reguserRequestPara): Promise<reguserResponse> => {
 };
 
 export const getUserInfo = (
-  r: userInfoResquestPara
+  r?: userInfoResquestPara
 ): Promise<userInfoResponse> => {
   const token = window.localStorage.getItem("token");
   return fetch("http://127.0.0.1:3007/my/userinfo", {
@@ -63,7 +63,7 @@ export const changeDefaultModel = (
 };
 
 export const getAllmodel = (
-  g: getAllmodelsResquestPara
+  g?: getAllmodelsResquestPara
 ): Promise<getAllmodelsResponse> => {
   const token = window.localStorage.getItem("token");
   return fetch("http://127.0.0.1:3007/model/allModel", {

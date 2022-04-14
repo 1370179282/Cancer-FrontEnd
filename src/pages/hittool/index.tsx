@@ -11,6 +11,7 @@ import {
 import { Uploadimg } from "../../compoment/upload/uploadimage";
 import { modelType, userDataTyle } from "../../../types/type";
 import { useNavigate } from "react-router-dom";
+import { getUserInfo } from "../../api/api";
 
 const Hittool: React.FC = ({}) => {
   const navigate = useNavigate();
@@ -54,37 +55,30 @@ const Hittool: React.FC = ({}) => {
   };
   React.useEffect(() => {
     const token = window.localStorage.getItem("token");
-    fetch("http://127.0.0.1:3007/my/userinfo", {
-      method: "GET",
-      headers: {
-        Authorization: token,
-      },
-    })
-      .then((r) => r.json())
-      .then((r) => {
-        console.log(r, "r");
-        if (r.status === 0) {
-          setmodelData(r.usermodel[0]);
-          const modelURL =
-            (r.usermodel[0].model_path || "").indexOf("model.json") === -1
-              ? r.usermodel[0].model_path + "/model.json"
-              : r.usermodel[0].model_path;
-          fetch(modelURL, {
-            method: "GET",
-            headers: {
-              Authorization: token,
-            },
-          })
-            .then((r) => r.json())
-            .then((r) => {
-              console.log(r, "r");
-              setDetial(r);
-            });
-        } else {
-          message.error("身份认证失败/过期，请重新登陆");
-          navigate("/");
-        }
-      });
+    getUserInfo().then((r) => {
+      console.log(r, "r");
+      if (r.status === 0) {
+        setmodelData(r.usermodel[0]);
+        const modelURL =
+          (r.usermodel[0].model_path || "").indexOf("model.json") === -1
+            ? r.usermodel[0].model_path + "/model.json"
+            : r.usermodel[0].model_path;
+        fetch(modelURL, {
+          method: "GET",
+          headers: {
+            Authorization: token,
+          },
+        })
+          .then((r) => r.json())
+          .then((r) => {
+            console.log(r, "r");
+            setDetial(r);
+          });
+      } else {
+        message.error("身份认证失败/过期，请重新登陆");
+        navigate("/");
+      }
+    });
   }, []);
   return (
     <>

@@ -28,7 +28,7 @@ import scnuLogo from "./picture/141541642254884_.pic_hd.jpg";
 import { createFromIconfontCN } from "@ant-design/icons";
 import { observer } from "mobx-react";
 import { useNavigate } from "react-router-dom";
-import { userDataTyle } from "../types/type";
+import { getUserInfo } from "./api/api";
 
 const { Text } = Typography;
 
@@ -45,23 +45,14 @@ const App: React.FC = (props) => {
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const [userData, setData] = useState<any>();
   React.useEffect(() => {
-    const token = window.localStorage.getItem("token");
-    fetch("http://127.0.0.1:3007/my/userinfo", {
-      method: "GET",
-      headers: {
-        Authorization: token,
-      },
-    })
-      .then((r) => r.json())
-      .then((r) => {
-        console.log(r, "r");
-        if (r.status === 0) {
-          setData(r.userdata);
-        } else {
-          message.error("身份认证失败/过期，请重新登陆");
-          navigate("/");
-        }
-      });
+    getUserInfo().then((r) => {
+      if (r.status === 0) {
+        setData(r.userdata);
+      } else {
+        message.error("身份认证失败/过期，请重新登陆");
+        navigate("/");
+      }
+    });
   }, []);
   return (
     <>

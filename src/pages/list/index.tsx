@@ -12,6 +12,8 @@ import {
   FormInstance,
 } from "antd";
 import React from "react";
+import { modelType } from "../../../types/type";
+import { addModel, changeDefaultModel, getAllmodel } from "../../api/api";
 import ModelForm from "./modelForm/modelForm";
 
 const { Option } = Select;
@@ -107,20 +109,10 @@ const columns: any = (token) => [
                 title: "是否确认设置为系统默认模型？",
                 cancelText: "取消",
                 onOk: () => {
-                  fetch("http://127.0.0.1:3007/my/usermodel", {
-                    method: "POST",
-                    headers: {
-                      Authorization: token,
-                      "Content-Type": "application/x-www-form-urlencoded",
-                    },
-                    body: `model_id=${all.model_id}`,
-                  })
-                    .then((r) => r.json())
+                  changeDefaultModel({ model_id: all.model_id })
                     .then((res) => {
                       if (res.status === 0) {
                         message.success("修改成功");
-                        // eslint-disable-next-line no-restricted-globals
-                        // location.reload();
                       } else {
                         message.error("修改失败");
                       }
@@ -139,25 +131,15 @@ const columns: any = (token) => [
 ];
 
 const List: React.FC = () => {
-  const [list, setlist] = React.useState();
+  const [list, setlist] = React.useState<modelType[]>();
   const formApi = React.useRef<FormInstance>();
   const token = window.localStorage.getItem("token");
-  const getAllmodel = () => {
-    fetch("http://127.0.0.1:3007/model/allModel", {
-      method: "GET",
-      headers: {
-        Authorization: token,
-      },
-    })
-      .then((r) => r.json())
-      .then((res) => {
-        if (res.status === 0) {
-          setlist(res.data);
-        }
-      });
-  };
   React.useEffect(() => {
-    getAllmodel();
+    getAllmodel().then((res) => {
+      if (res.status === 0) {
+        setlist(res.data);
+      }
+    });
   }, []);
   return (
     <>
@@ -178,20 +160,16 @@ const List: React.FC = () => {
                   const values = formApi.current.getFieldsValue(true);
                   console.log(values, "values");
                   if (values.canOk) {
-                    fetch("http://127.0.0.1:3007/model/addModel", {
-                      method: "POST",
-                      headers: {
-                        Authorization: token,
-                        "Content-Type": "application/x-www-form-urlencoded",
-                      },
-                      body: `model_detial=${values.comment}&model_type=${values.type}&model_path=${values.modelurl}&model_name=${values.name}`,
-                    })
-                      .then((r) => r.json())
-                      .then((res) => {
-                        if (res.status === 0) {
-                          message.success("上传模型成功！");
-                        }
-                      });
+                    addModel({
+                      comment: values.comment,
+                      type: values.type,
+                      modelurl: values.modelurl,
+                      name: values.name,
+                    }).then((res) => {
+                      if (res.status === 0) {
+                        message.success("上传模型成功！");
+                      }
+                    });
                   } else {
                     message.error("请先确认上传模型！");
                     return Promise.reject();

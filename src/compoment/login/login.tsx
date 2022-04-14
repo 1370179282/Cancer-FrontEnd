@@ -4,6 +4,7 @@ import { Form, Input, Button, Checkbox, message } from "antd";
 import userStore from "../../store/userstore";
 import { observer } from "mobx-react";
 import { useNavigate } from "react-router-dom";
+import { goLogin, goReguser } from "../../api/api";
 
 const Login: React.FC<{}> = ({}) => {
   const [isLogin, setLogin] = React.useState<boolean>(true);
@@ -11,14 +12,10 @@ const Login: React.FC<{}> = ({}) => {
   const onFinish = (values: any) => {
     console.log("Success:", values);
     if (isLogin) {
-      fetch("http://127.0.0.1:3007/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: `username=${values.username}&password=${values.password}`,
+      goLogin({
+        username: values.username,
+        password: values.password,
       })
-        .then((r) => r.json())
         .then((res) => {
           console.log(res, "res");
           if (res.status === 0) {
@@ -33,18 +30,13 @@ const Login: React.FC<{}> = ({}) => {
         })
         .catch((e) => message.error("登陆失败:" + e));
     } else {
-      fetch("http://127.0.0.1:3007/api/reguser", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: `username=${values.username}&password=${values.password}`,
-      })
-        .then((r) => r.json())
-        .then((res) => {
-          console.log(res, "res");
-          message.success("注册成功");
-        });
+      goReguser({
+        username: values.username,
+        password: values.password,
+      }).then((res) => {
+        console.log(res, "res");
+        message.success("注册成功");
+      });
     }
   };
 

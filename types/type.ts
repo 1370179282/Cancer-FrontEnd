@@ -51,10 +51,10 @@ export interface modelDefaultResponse {
 //用户信息的请求/回应类型
 export interface userInfoResquestPara {}
 export interface userInfoResponse {
-  classification: string;
-  id: number;
-  model_id: string;
-  username: string;
+  status: number;
+  message: string;
+  userdata: Array<modelType>;
+  usermodel: number;
 }
 
 //获得全部模型的请求/回应类型
