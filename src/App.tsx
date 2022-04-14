@@ -16,21 +16,19 @@ import {
 import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
-  ApartmentOutlined,
   FolderOpenOutlined,
   ExperimentOutlined,
   UnorderedListOutlined,
   LogoutOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import Train from "./pages/train";
 import Hittool from "./pages/hittool";
 import List from "./pages/list";
 import scnuLogo from "./picture/141541642254884_.pic_hd.jpg";
 import { createFromIconfontCN } from "@ant-design/icons";
 import { observer } from "mobx-react";
-import Login from "./compoment/login";
-import userStore from "./store/userstore";
+import { useNavigate } from "react-router-dom";
+import { userDataTyle } from "../types/type";
 
 const { Text } = Typography;
 
@@ -43,11 +41,9 @@ const IconFont = createFromIconfontCN({
 const { Header, Sider, Content, Footer } = Layout;
 
 const App: React.FC = (props) => {
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState<boolean>(false);
-  const [isLogined, setLogined] = useState<boolean>(false);
-  const [userData, setData] = useState<Record<string, string>>();
-
-  //const username = storage.getItem("username");
+  const [userData, setData] = useState<any>();
   React.useEffect(() => {
     const token = window.localStorage.getItem("token");
     fetch("http://127.0.0.1:3007/my/userinfo", {
@@ -60,24 +56,16 @@ const App: React.FC = (props) => {
       .then((r) => {
         console.log(r, "r");
         if (r.status === 0) {
-          if (!isLogined) message.success("自动登录成功");
-
-          setLogined(true);
-          setData(r.data);
+          setData(r.userdata);
         } else {
           message.error("身份认证失败/过期，请重新登陆");
-          setLogined(false);
+          navigate("/");
         }
       });
-  }, [isLogined]);
+  }, []);
   return (
     <>
-      {!isLogined && (
-        <>
-          <Login setLogined={setLogined} />
-        </>
-      )}
-      {isLogined && (
+      {1 && (
         <>
           <Layout style={{ height: "100%" }}>
             <Sider
@@ -95,16 +83,13 @@ const App: React.FC = (props) => {
               </div>
               <Menu theme="light" mode="inline" defaultSelectedKeys={["1"]}>
                 <Menu.Item key="1" icon={<ExperimentOutlined />}>
-                  <Link to={"/hittool"} />
-                  检测工具
+                  <Link to={"/app/train"} />
+                  图像检测
                 </Menu.Item>
-                <Menu.Item key="2" icon={<ApartmentOutlined />}>
-                  <Link to={"/train"} />
-                  训练模型
-                </Menu.Item>
+
                 <Menu.Item key="3" icon={<FolderOpenOutlined />}>
-                  <Link to={"/list"} />
-                  模型大全
+                  <Link to={"/app/list"} />
+                  更多模型
                 </Menu.Item>
               </Menu>
               {collapsed ? (
@@ -156,7 +141,7 @@ const App: React.FC = (props) => {
                           rel="noopener noreferrer"
                           href="https://www.aliyun.com"
                         >
-                          还没写呢
+                          个人中心
                         </a>{" "}
                         <UnorderedListOutlined />
                       </Menu.Item>
@@ -173,7 +158,7 @@ const App: React.FC = (props) => {
                               okType: "danger",
                               onOk: () => {
                                 window.localStorage.setItem("token", "");
-                                setLogined(false);
+                                navigate("/");
                               },
                             });
                           }}
@@ -208,13 +193,13 @@ const App: React.FC = (props) => {
                 }}
               >
                 <Routes>
-                  <Route path="/hittool" element={<Hittool />} />
-                  <Route path="/train" element={<Train />} />
+                  {/* <Route path="/" element={<Login />} /> */}
+                  <Route path="/train" element={<Hittool />} />
                   <Route path="/list" element={<List />} />
                 </Routes>
               </Content>
               <Footer style={{ textAlign: "center", padding: "0px 50px" }}>
-                早期胃癌筛查网络辅助平台 ©2022 Created by Jiahao Feng
+                癌细胞检测网络辅助平台 ©2022 Created by Jiahao Feng
               </Footer>
             </Layout>
           </Layout>
