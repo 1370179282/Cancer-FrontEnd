@@ -12,6 +12,8 @@ import { Uploadimg } from "../../compoment/upload/uploadimage";
 import { modelType, userDataTyle } from "../../../types/type";
 import { useNavigate } from "react-router-dom";
 import { getUserInfo } from "../../api/api";
+import userStore from "../../store/userstore";
+import { observer } from "mobx-react";
 
 const Hittool: React.FC = ({}) => {
   const navigate = useNavigate();
@@ -24,34 +26,28 @@ const Hittool: React.FC = ({}) => {
       modelData?.model_path &&
       (modelData?.model_path || "").indexOf("model.json") === -1
         ? modelData.model_path + "/model.json"
-        : modelData.model_path;
-    const model: any = await tf.loadLayersModel(modelURL);
-    console.log(model, "model");
-    let img: any = new Image(96, 96);
-    img.src = imagelist.current;
-    img.crossOrigin = "anonymous";
-    setTimeout(async () => {
+        : modelData.model_path; //模型路径的处理，需要找到model.json文件
+    const model: any = await tf.loadLayersModel(modelURL); //根据URL读取模型文件
+    let img: any = new Image(96, 96); //生成图片元素
+    img.src = imagelist.current; //令图片的URL为上传图片的URL
+    img.crossOrigin = "anonymous"; //跨域配置
+    img.onload = async () => {
       const ext = tf.tidy(() => {
+        //内存管理
         return tf.image
-          .resizeBilinear(tf.browser.fromPixels(img), [96, 96])
-          .div(255)
-          .reshape([-1, 96, 96, 3]);
+          .resizeBilinear(tf.browser.fromPixels(img), [96, 96]) //将图片设置为tensorflow元素
+          .div(255) //python转换的图片格式需要除以255处理
+          .reshape([-1, 96, 96, 3]); //返回模型需要的输入形状
       });
-      const predictRes = await model.predict(ext).data();
-      console.log(predictRes[1], "predictRes");
-      if (predictRes[1] > 0.6) {
-        Modal.error({
-          title: "检测出癌细胞",
-          content: "相似度为:" + predictRes[1].toFixed(6),
-        });
-      } else {
-        Modal.success({
-          title: "没有检测出癌细胞",
-          content: "相似度为:" + predictRes[1].toFixed(6),
-        });
-      }
+      const predictRes = await model.predict(ext).data(); //运行模型推理
+      console.log(predictRes[1], "predictRes"); //输出的概率值
+      Modal.info({
+        title: predictRes[1] > 0.6 ? "检测出癌细胞" : "没有检测出癌细胞",
+        content: "相似度为:" + predictRes[1].toFixed(6),
+      });
+
       img = 0;
-    }, 300);
+    };
   };
   React.useEffect(() => {
     const token = window.localStorage.getItem("token");
@@ -102,22 +98,26 @@ const Hittool: React.FC = ({}) => {
         <Descriptions.Item label="状态">
           <Badge status="processing" text="正常" />
         </Descriptions.Item>
+        <Descriptions.Item label="操作">
+          <div>
+            <Button
+              onClick={() => {
+                test();
+                console.log(imagelist);
+              }}
+            >
+              开始检测
+            </Button>
+            <Uploadimg
+              maxCount={1}
+              imagelist={imagelist}
+              imgRef={imageRef}
+            ></Uploadimg>
+          </div>
+        </Descriptions.Item>
       </Descriptions>
-      <Button
-        onClick={() => {
-          test();
-          console.log(imagelist);
-        }}
-      >
-        test
-      </Button>
-      <Uploadimg
-        maxCount={1}
-        imagelist={imagelist}
-        imgRef={imageRef}
-      ></Uploadimg>
     </>
   );
 };
 
-export default Hittool;
+export default observer(Hittool);

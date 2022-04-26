@@ -2,13 +2,12 @@ import { observable, action } from "mobx";
 
 export class UserStore {
   @observable
-  isLogined: boolean = false;
+  test: boolean = false;
 
   @action.bound
-  setLogin = (val: boolean) => {
-    this.isLogined = val;
+  setTest = (val: boolean) => {
+    this.test = val;
   };
 }
 const userStore = new UserStore();
 export default userStore;
-
